@@ -10,7 +10,7 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap');
 
-    .stApp { background-color: #FFFFFF; color: #000000; font-family: 'DM Sans', sans-serif; }
+    .stApp { background- color: #000000; font-family: 'DM Sans', sans-serif; }
     [data-testid="stSidebar"] { display: none; }
 
     .stTextInput>div>div>input,
@@ -60,7 +60,12 @@ st.markdown("""
 
     .indice-box { background:linear-gradient(135deg,#D97706,#F59E0B); border-radius:18px; padding:24px; text-align:center; box-shadow:0 4px 24px rgba(217,119,6,0.3); margin-bottom:16px; }
     .stApp .indice-box, .stApp .indice-box p, .stApp .indice-box span, .stApp .indice-box div { color:white !important; }
-    .indice-numero { font-size:3.5em; font-weight:700; font-family:'Playfair Display',serif; }
+    .indice-numero { font-size:3.5em; font-weight:700; font-family:'Playfair Display',serif; color:white !important; }
+    .stApp .indice-numero { color:white !important; }
+
+    .card-orange { background:linear-gradient(135deg,#FFFBEB,#FEF3C7); padding:22px; border-radius:16px; border:1px solid #FCD34D; margin-bottom:15px; white-space:pre-wrap; }
+    .stApp .card-orange, .stApp .card-orange p, .stApp .card-orange span,
+    .stApp .card-orange div, .stApp .card-orange strong, .stApp .card-orange em { color:#1A1A2E !important; }
 
     .missao-box { background:linear-gradient(135deg,#F0FDF4,#DCFCE7); border:2px solid #16A34A; border-radius:16px; padding:20px; margin-bottom:16px; }
     .stApp .missao-box, .stApp .missao-box p, .stApp .missao-box span, .stApp .missao-box div, .stApp .missao-box strong { color:#14532D !important; }
@@ -77,11 +82,13 @@ st.markdown("""
     .streak-box { background:linear-gradient(135deg,#FEF3C7,#FFFBEB); border:2px solid #F59E0B; border-radius:16px; padding:20px; text-align:center; margin-bottom:16px; }
     .stApp .streak-box, .stApp .streak-box p, .stApp .streak-box span, .stApp .streak-box div { color:#92400E !important; }
 
+
     .stat-box { background:#FFFBEB; border-radius:12px; padding:18px; text-align:center; border:1px solid #FCD34D; }
-    .stat-numero { font-size:2em; font-weight:700; color:#D97706 !important; font-family:'Playfair Display',serif; }
+    .stApp .stat-box div, .stApp .stat-box span, .stApp .stat-box p { color:#1A1A2E !important; }
+    .stApp .stat-numero, .stat-numero { font-size:2em; font-weight:700; color:#D97706 !important; font-family:'Playfair Display',serif; }
 
     .hist-item { background:#FFFBEB; border-radius:10px; padding:12px 16px; margin-bottom:8px; border-left:4px solid #F59E0B; }
-    .stApp .hist-item, .stApp .hist-item p, .stApp .hist-item span, .stApp .hist-item div { color:#1A1A2E !important; }
+    .stApp .hist-item, .stApp .hist-item p, .stApp .hist-item span, .stApp .hist-item div, .stApp .hist-item small { color:#1A1A2E !important; }
 
     .badge { background:#D97706; color:white !important; padding:4px 14px; border-radius:20px; font-size:0.78em; font-weight:600; display:inline-block; margin:2px; }
     .badge-verde { background:#059669; color:white !important; padding:4px 14px; border-radius:20px; font-size:0.78em; font-weight:600; display:inline-block; margin:2px; }
@@ -95,6 +102,10 @@ st.markdown("""
     .divider { border:none; height:1px; background:linear-gradient(to right,transparent,#FCD34D,transparent); margin:20px 0; }
     .questao-box { background:#FFFFFF; border:2px solid #FCD34D; border-radius:14px; padding:20px; margin-bottom:16px; }
     .stApp .questao-box, .stApp .questao-box p, .stApp .questao-box span, .stApp .questao-box div { color:#1A1A2E !important; }
+
+    /* Garante que texto normal (fora de cards) seja sempre preto no fundo branco */
+    .stApp > div > div > div > div { color: #1A1A2E; }
+    .stMarkdown p, .stMarkdown span, .stMarkdown div { color: #1A1A2E !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -657,6 +668,10 @@ elif st.session_state.etapa == "App":
         materias_radar = st.session_state.get('radar_materias', {})
         maior_evolucao = max(materias_radar.items(), key=lambda x: x[1], default=("—", 0))
 
+        # Variáveis para o HTML (evita expressões condicionais dentro de f-string)
+        rec_dif = f"<strong>Maior dificuldade:</strong> {dif}. " if dif != "Não definida" else ""
+        rec_acao = f"Priorize {dif} nos próximos dias e mantenha questões diárias." if dif != "Não definida" else "Configure seu perfil completo para recomendações personalizadas."
+
         st.markdown(f"""
         <div class='painel-exec'>
             <div style='font-size:1.3em;font-weight:700;margin-bottom:20px;letter-spacing:1px;'>🎓 PAINEL DO MENTOR — {st.session_state.usuario.upper()}</div>
@@ -698,14 +713,20 @@ elif st.session_state.etapa == "App":
             </div>
             <div style='background:rgba(255,255,255,0.06);border-radius:12px;padding:16px;'>
                 <div style='font-size:0.72em;opacity:0.6;margin-bottom:8px;'>🤖 RECOMENDAÇÃO DA IA</div>
-                <div style='font-size:0.95em;line-height:1.7;'>
-                    {'<strong>Maior dificuldade:</strong> ' + dif + '. ' if dif != 'Não definida' else ''}
-                    Índice de preparação: <strong>{idx}%</strong> — Probabilidade estimada: <strong>{prob}</strong>.
-                    {'Priorize ' + dif + ' nos próximos dias e mantenha questões diárias.' if dif != 'Não definida' else 'Configure seu perfil completo para recomendações personalizadas.'}
-                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+        # Recomendação separada para evitar escape de HTML com variáveis
+        st.markdown(
+            f"<div style='background:rgba(26,26,46,0.05);border:1px solid #FCD34D;border-radius:12px;"
+            f"padding:14px 18px;margin-top:-14px;margin-bottom:20px;font-size:0.95em;line-height:1.7;color:#1A1A2E;'>"
+            f"{rec_dif}"
+            f"Índice de preparação: <strong>{idx}%</strong> — Probabilidade estimada: <strong>{prob}</strong>. "
+            f"{rec_acao}"
+            f"</div>",
+            unsafe_allow_html=True
+        )
 
         if st.button("🤖 RECOMENDAÇÃO ESTRATÉGICA COMPLETA DA IA"):
             with st.spinner("Analisando seu perfil completo..."):
